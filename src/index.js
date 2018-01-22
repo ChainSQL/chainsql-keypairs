@@ -94,6 +94,11 @@ function sign(messageHex, privateKey) {
   return select(algorithm).sign(hexToBytes(messageHex), privateKey)
 }
 
+function signBytes(message, privateKey) {
+  const algorithm = getAlgorithmFromKey(privateKey)
+  return select(algorithm).sign(message, privateKey)
+}
+
 function verify(messageHex, signature, publicKey) {
   const algorithm = getAlgorithmFromKey(publicKey)
   return select(algorithm).verify(hexToBytes(messageHex), signature, publicKey)
@@ -118,6 +123,7 @@ module.exports = {
   generateSeed,
   deriveKeypair,
   sign,
+  signBytes,
   verify,
   deriveAddress,
   deriveNodeAddress
