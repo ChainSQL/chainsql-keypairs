@@ -1,7 +1,7 @@
 {
-  "name": "chainsql-keypairs",
-  "version": "0.10.4",
-  "description": "chainsql key pairs",
+  "name": "dac-keypairs",
+  "version": "1.0.0",
+  "description": "dac key pairs",
   "files": [
     "distrib/npm/*",
     "bin/*",
@@ -18,7 +18,7 @@
     "brorand": "^1.0.5",
     "elliptic": "^5.1.0",
     "hash.js": "^1.0.3",
-    "chainsql-address-codec": "^2.0.3"
+    "dac-address-codec": "^1.0.0"
   },
   "devDependencies": {
     "assert-diff": "^1.0.1",
@@ -45,15 +45,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/chainsql/chainsql-keypairs.git"
+    "url": "git://github.com/dac/dac-keypairs.git"
   },
   "engines": {
     "node": ">=0.12.0"
   },
   "bugs": {
-    "url": "https://github.com/chainsql/chainsql-keypairs/issues"
+    "url": "https://github.com/dac/dac-keypairs/issues"
   },
-  "homepage": "https://github.com/chainsql/chainsql-keypairs#readme",
+  "homepage": "https://github.com/dac/dac-keypairs#readme",
   "license": "ISC",
   "readmeFilename": "README.md"
 }

@@ -6,7 +6,7 @@ const hashjs = require('hash.js')
 const elliptic = require('elliptic')
 const Ed25519 = elliptic.eddsa('ed25519')
 const Secp256k1 = elliptic.ec('secp256k1')
-const addressCodec = require('chainsql-address-codec')
+const addressCodec = require('dac-address-codec')
 const derivePrivateKey = require('./secp256k1').derivePrivateKey
 const accountPublicFromPublicGenerator = require('./secp256k1')
   .accountPublicFromPublicGenerator

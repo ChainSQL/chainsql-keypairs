@@ -1,6 +1,6 @@
-# chainsql-keypairs [![NPM](https://img.shields.io/npm/v/chainsql-keypairs.svg)](https://npmjs.org/package/chainsql-keypairs) [![Build Status](https://img.shields.io/travis/chainsql/chainsql-keypairs/master.svg)](https://travis-ci.org/chainsql/chainsql-keypairs) [![codecov.io](http://codecov.io/github/chainsql/chainsql-keypairs/coverage.svg?branch=master)](http://codecov.io/github/chainsql/chainsql-keypairs?branch=master)
+# dac-keypairs [![NPM](https://img.shields.io/npm/v/dac-keypairs.svg)](https://npmjs.org/package/dac-keypairs) [![Build Status](https://img.shields.io/travis/dac/dac-keypairs/master.svg)](https://travis-ci.org/dac/dac-keypairs) [![codecov.io](http://codecov.io/github/dac/dac-keypairs/coverage.svg?branch=master)](http://codecov.io/github/dac/dac-keypairs?branch=master)
 
-An implementation of chainsql keypairs & wallet generation using
+An implementation of dac keypairs & wallet generation using
 [elliptic](https://github.com/indutny/elliptic) which supports rfc6979 and
 eddsa deterministic signatures.
 
@@ -29,7 +29,7 @@ Verify a signature for a given hex-encoded message and public key. Returns true 
 ```
 deriveAddress(publicKey: string) -> string
 ```
-Derive a chainsql address from a public key.
+Derive a dac address from a public key.
 
 ```
 deriveNodeAddress(publicKey: string) -> string
@@ -37,7 +37,7 @@ deriveNodeAddress(publicKey: string) -> string
 Derive a node address from a public key.
 
 
-## Generate a random chainsql address
+## Generate a random dac address
 
 ```
 const seed = generateSeed();
