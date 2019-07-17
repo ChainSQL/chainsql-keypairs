@@ -15,7 +15,8 @@ const utils = require('./utils')
 const hexToBytes = utils.hexToBytes
 const bytesToHex = utils.bytesToHex
 
-const sdServerUrl = "http://192.168.29.120:8000"
+const sdServerUrl = "http://192.168.29.114:8000";
+const ACCOUNT_PUBLIC = 35;
 
 function generateSeed(options = {}) {
 	assert(!options.entropy || options.entropy.length >= 16, 'entropy too short')
@@ -86,15 +87,15 @@ const ed25519 = {
   }
 }
 
-const gmSM2 = {
-	deriveKeypair: async function(entropy) {
+const gmAlg = {
+	deriveKeypair: function(entropy) {
 		const genKeyUrl = sdServerUrl + "/2/21";
 		const getPubUrl = sdServerUrl + "/2/22";
 		const postData = { containerIndex:0 };
 		var privateKey = "", publicKey = "";
 		try {
-			const retGenKey = await sendPost(genKeyUrl, postData);
-			const retGetPub = await sendPost(getPubUrl, postData);
+			const retGenKey = sendPost(genKeyUrl, postData);
+			const retGetPub = sendPost(getPubUrl, postData);
 			privateKey = "4700";
 			// console.log(retGetPub.retCode);
 			publicKey = retGetPub.publicKey;
@@ -103,76 +104,91 @@ const gmSM2 = {
 		}
 		return {privateKey, publicKey}
 	},
-	sign: async function(message, privateKey) {
+	sign: function(message, privateKey) {
 		const sm3HashUrl = sdServerUrl + "/3";
 		const sm2SignUrl = sdServerUrl + "/2/24";
+
+		const msgHexStr = gmByte2HexStr(message);
 		const postMessage = {
-			data: bytesToHex(message),
+			data: msgHexStr,
 			dataLen: message.length
 		}
 		try {
-			const messageHash = await sendPost(sm3HashUrl, postMessage);
+			const messageHash = sendPost(sm3HashUrl, postMessage);
 			const postData4Sign = {
 				data: messageHash.hashData,
 				dataLen:32
 			}
-			const signRet = await sendPost(sm2SignUrl, postData4Sign);
+			const signRet = sendPost(sm2SignUrl, postData4Sign);
 			return signRet.signedData;
 		} catch (error) {
 			throw new Error(error);
 		}
 	},
-	verify: async function(message, signature, publicKey) {
+	verify: function(message, signature, publicKey) {
 		const sm3HashUrl = sdServerUrl + "/3";
 		const sm2VerifyUrl = sdServerUrl + "/2/25";
+		const msgHexStr = gmByte2HexStr(message);
 		const postMessage = {
-			data: bytesToHex(message),
+			data: msgHexStr,
 			dataLen: message.length
 		}
 		try {
-			const messageHash = await sendPost(sm3HashUrl, postMessage);
+			const messageHash = sendPost(sm3HashUrl, postMessage);
 			const postData4Verify = {
 				data: messageHash.hashData,
 				dataLen:32,
 				signedData: signature,
 				signedDataLen: signature.length
 			}
-			const verifyRet = await sendPost(sm2VerifyUrl, postData4Verify);
-			return verifyRet.retCode ? false : true;
+			const verifyRet = sendPost(sm2VerifyUrl, postData4Verify);
+			return verifyRet.retCode === "0x00000000" ? true : false;
 		} catch (error) {
 			throw new Error(error);
 		}
 	}
 }
 
+function gmByte2HexStr(message) {
+	let msgHexStr;
+	let originalData = ArrayBuffer.isView(message) ? Buffer.from(message) : message;
+	if (Array.isArray(originalData)) {
+		msgHexStr = bytesToHex(originalData);
+	} else if (Buffer.isBuffer(originalData)) {
+		msgHexStr = originalData.toString('hex');
+	} else {
+		let errMsg = "Message data must be array or buffer";
+		throw new Error(errMsg);
+	}
+	return msgHexStr;
+}
+
 function select(algorithm) {
-  const methods = {'ecdsa-secp256k1': secp256k1, ed25519, "gmSM2": gmSM2}
+	const methods = {"gmAlg": gmAlg, 'ecdsa-secp256k1': secp256k1, ed25519}
   return methods[algorithm]
 }
 
 function deriveKeypair(seed, options) {
-//   const decoded = addressCodec.decodeSeed(seed)
-//   const algorithm = decoded.type === 'ed25519' ? 'ed25519' : 'ecdsa-secp256k1'
 	let decoded = {};
 	if (seed === "gmAlg") {
 		decoded.type = "gmAlg";
 	} else {
 		decoded = addressCodec.decodeSeed(seed);
 	}
-	//   var algorithm = decoded.type === 'ed25519' ? 'ed25519' : 'ecdsa-secp256k1';
+
 	let algorithm;
 	switch (decoded.type) {
 		case "ed25519":
 			algorithm = "ed25519";
 			break;
 		case "secp256k1":
-			algorithm = "secp256k1";
+			algorithm = "ecdsa-secp256k1";
 			break;
 		case "gmAlg":
 			algorithm = "gmAlg";
 			break;
 		default:
-			algorithm = "secp256k1";
+			algorithm = "ecdsa-secp256k1";
 	}
 	const method = select(algorithm)
 	const keypair = method.deriveKeypair(decoded.bytes, options)
@@ -186,8 +202,13 @@ function deriveKeypair(seed, options) {
 
 function getAlgorithmFromKey(key) {
   const bytes = hexToBytes(key)
-  return (bytes.length === 33 && bytes[0] === 0xED) ?
-    'ed25519' : 'ecdsa-secp256k1'
+  if(bytes.length === 65 || bytes.length === 2) {
+	  if(bytes[0] === 0x47)
+	  	return "gmAlg";
+  } else {
+    return (bytes.length === 33 && bytes[0] === 0xED) ?
+      'ed25519' : 'ecdsa-secp256k1'
+  }
 }
 
 function sign(messageHex, privateKey) {
@@ -220,6 +241,92 @@ function deriveNodeAddress(publicKey) {
   return deriveAddressFromBytes(accountPublicBytes)
 }
 
+function gmAlgSm2Enc(keyIn, plainData) {
+	let sm2EncUrl = sdServerUrl;
+	let postMessage = {
+		plainData: plainData,
+		plainDataLen: plainData.length
+	}
+	if(keyIn === "gmAlg"){
+		sm2EncUrl += "/2/26";
+	} else {
+		sm2EncUrl += "/2/30";
+		let decoded = addressCodec.decode(keyIn, ACCOUNT_PUBLIC);
+		let decodedPublic = decoded.slice(1, decoded.length-4);
+		const decodedPublicHexStr = gmByte2HexStr(decodedPublic);
+		postMessage.publicKey = decodedPublicHexStr;
+		postMessage.publicKeyLen = decodedPublic.length;
+	}
+	
+	try {
+		const symEncRet = sendPost(sm2EncUrl, postMessage);
+		return symEncRet.cipherData;
+	} catch (error) {
+		throw new Error(error);
+	}
+}
+
+function gmAlgSm2Dec(priKey, cipherData) {
+	const sm2DecUrl = sdServerUrl + "/2/27";
+	const postMessage = {
+		cipherData: cipherData,
+		cipherDataLen: cipherData.length
+	}
+	try {
+		const symEncRet = sendPost(sm2DecUrl, postMessage);
+		return symEncRet.plainData;
+	} catch (error) {
+		throw new Error(error);
+	}
+}
+
+function gmAlgSymEnc(symKey, plainData) {
+	const sm4EncUrl = sdServerUrl + "/4/41";
+	const postMessage = {
+		key: symKey,
+		keyLen: symKey.length,
+		plainData: plainData,
+		plainDataLen: plainData.length
+	}
+	try {
+		const symEncRet = sendPost(sm4EncUrl, postMessage);
+		return symEncRet.cipherData;
+	} catch (error) {
+		throw new Error(error);
+	}
+}
+
+function gmAlgSymDec(symKey, cipherData) {
+	const sm4DecUrl = sdServerUrl + "/4/42";
+	const postMessage = {
+		key: symKey,
+		keyLen: symKey.length,
+		cipherData: cipherData,
+		cipherDataLen: cipherData.length
+	}
+	try {
+		const symEncRet = sendPost(sm4DecUrl, postMessage);
+		return symEncRet.plainData;
+	} catch (error) {
+		throw new Error(error);
+	}
+}
+
+function gmAlgSm3(message) {
+	const sm3HashUrl = sdServerUrl + "/3";
+	const msgHexStr = gmByte2HexStr(message);
+	const postMessage = {
+		data: msgHexStr,
+		dataLen: message.length
+	}
+	try {
+		const messageHash = sendPost(sm3HashUrl, postMessage);
+		return messageHash.hashData;
+	} catch (error) {
+		throw new Error(error);
+	}
+}
+
 module.exports = {
   generateSeed,
   deriveKeypair,
@@ -227,5 +334,10 @@ module.exports = {
   signBytes,
   verify,
   deriveAddress,
-  deriveNodeAddress
+  deriveNodeAddress,
+  gmAlgSm2Enc,
+  gmAlgSm2Dec,
+  gmAlgSymEnc,
+  gmAlgSymDec,
+  gmAlgSm3
 }

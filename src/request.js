@@ -1,32 +1,22 @@
 "use strict";
 
-const request = require('request');
+const request = require('sync-request');
 
-const verifyFailCode = 0x20100005;
+const verifyFailCode = "0x‭20100005‬";
+const execSuccess = "0x00000000"
 
 function sendPost(url, requestData){
-	return new Promise(function (resolve, reject) {
-		request({
-			url: url,
-			method: "POST",
-			json: true,
-			headers: {
-				"content-type": "application/json",
-			},
-			body: requestData
-		}, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				console.log(body);
-				if (!body.retCode || body.retCode === verifyFailCode) {
-					resolve(body);
-				} else {
-					reject(body);
-				}
-			} else {
-				reject(error);
-			}
-		});
-	})
+	const response = request('POST', url, {
+		json: requestData,
+		timeout:3000
+	});
+	// console.log(response);
+	const bodyRetJson = JSON.parse(response.getBody('utf8'));
+	if(bodyRetJson.retCode === execSuccess || bodyRetJson.retCode === verifyFailCode){
+		return bodyRetJson;
+	} else {
+		throw new Error(JSON.stringify(bodyRetJson));
+	}
 }
 
 module.exports = sendPost;
