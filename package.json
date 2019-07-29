@@ -1,6 +1,6 @@
 {
   "name": "chainsql-keypairs",
-  "version": "0.10.4",
+  "version": "0.10.5",
   "description": "chainsql key pairs",
   "files": [
     "distrib/npm/*",
@@ -18,7 +18,8 @@
     "brorand": "^1.0.5",
     "elliptic": "^5.1.0",
     "hash.js": "^1.0.3",
-    "chainsql-address-codec": "^2.0.3"
+	"chainsql-address-codec": "^2.0.3",
+	"sync-request": "^6.1.0"
   },
   "devDependencies": {
     "assert-diff": "^1.0.1",
@@ -35,7 +36,6 @@
     "map-stream": "~0.1.0",
     "mocha": "~2.3.3",
     "nock": "^2.13.0"
-	"sync-request": "^6.1.0"
   },
   "scripts": {
     "build": "gulp",
