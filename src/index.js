@@ -17,7 +17,7 @@ const bytesToHex = utils.bytesToHex
 
 const sdServerUrl = "http://192.168.29.114:8000";
 const ACCOUNT_PUBLIC = 35;
-const cryptAlgType = "normal";
+var cryptAlgType = "normal";
 
 function generateSeed(options = {}) {
 	assert(!options.entropy || options.entropy.length >= 16, 'entropy too short')
