@@ -10,12 +10,11 @@ const addressCodec = require('chainsql-address-codec')
 const derivePrivateKey = require('./secp256k1').derivePrivateKey
 const accountPublicFromPublicGenerator = require('./secp256k1')
   .accountPublicFromPublicGenerator
-const sendPost = require('./request')
 const utils = require('./utils')
 const hexToBytes = utils.hexToBytes
 const bytesToHex = utils.bytesToHex
 
-const sdServerUrl = "http://192.168.29.114:8000";
+const sdServerUrl = "http://127.0.0.1:8000";
 const ACCOUNT_PUBLIC = 35;
 var cryptAlgType = "normal";
 
@@ -248,6 +247,10 @@ function setCryptAlgType(algType) {
 
 function getCryptAlgType() {
 	return cryptAlgType;
+}
+
+function sendPost(keyUrl, postMsg) {
+    return {}
 }
 
 function gmAlgSm2Enc(keyIn, plainData) {
