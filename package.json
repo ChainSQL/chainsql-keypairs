@@ -16,7 +16,7 @@
     "babel-runtime": "^5.8.20",
     "bn.js": "^3.1.1",
     "brorand": "^1.0.5",
-    "elliptic": "^5.1.0",
+    "elliptic": "^6.5.3",
     "hash.js": "^1.0.3",
 	"chainsql-address-codec": "^2.0.3"
   },
