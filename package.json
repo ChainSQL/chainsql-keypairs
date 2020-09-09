@@ -1,6 +1,6 @@
 {
   "name": "chainsql-keypairs",
-  "version": "0.10.9",
+  "version": "0.10.11",
   "description": "chainsql key pairs",
   "files": [
     "distrib/npm/*",
@@ -16,7 +16,7 @@
     "babel-runtime": "^5.8.20",
     "bn.js": "^3.1.1",
     "brorand": "^1.0.5",
-    "chainsql-address-codec": "^2.0.3",
+    "chainsql-address-codec": "^2.0.4",
     "elliptic": "^5.1.0",
     "hash.js": "^1.0.3",
     "chainsql-sm-crypto": "^0.1.0"
