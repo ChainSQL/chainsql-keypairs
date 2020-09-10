@@ -36,6 +36,25 @@ function hexToBytes(a) {
   return new BN(a, 16).toArray(null, a.length / 2);
 }
 
+/**
+ * 补全16进制字符串
+ */
+function leftPad(input, num) {
+  if (input.length >= num) return input
+
+  return (new Array(num - input.length + 1)).join('0') + input
+}
+
+
+/**
+ * 补全16进制字符串
+ */
+function leftPadding(input, num) {
+  if (input.length >= num) return input
+
+  return (new Array(num - input.length + 1)).join('0') + input
+}
+
 function computePublicKeyHash(publicKeyBytes) {
   var hash256 = hashjs.sha256().update(publicKeyBytes).digest();
   var hash160 = hashjs.ripemd160().update(hash256).digest();
@@ -194,6 +213,8 @@ module.exports = {
   seedFromPhrase: seedFromPhrase,
   stringToBytes: stringToBytes,
   bytesToString: bytesToString,
+  leftPadding: leftPadding,
+  leftPad: leftPad,
   arrayToHex: arrayToHex,
   hexToArray: hexToArray,
   arrayToUtf8: arrayToUtf8,
