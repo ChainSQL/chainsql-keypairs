@@ -255,7 +255,7 @@ const softGMAlg = {
 
 		var privateHex =  addressCodec.decodeAccountPrivate(privateKey)
 		var keypair    =  sm2.generateKeyPairFromSeed(privateHex)
-		return sm2Test.doDecrypt(cipherDataHex,keypair.privateKey);
+		return sm2.doDecrypt(cipherDataHex,keypair.privateKey);
 	},
 	softSM3:function(hexStr){
  

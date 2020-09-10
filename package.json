@@ -1,6 +1,6 @@
 {
   "name": "chainsql-keypairs",
-  "version": "0.10.12",
+  "version": "0.10.13",
   "description": "chainsql key pairs",
   "files": [
     "distrib/npm/*",
@@ -38,7 +38,7 @@
     "nock": "^2.13.0"
   },
   "scripts": {
-    "test":"mocha",
+    "test": "mocha",
     "build": "gulp",
     "compile": "babel --optional runtime -d distrib/npm/ src/",
     "compile-with-source-maps": "babel --optional runtime -s -t -d distrib/npm/ src/",
