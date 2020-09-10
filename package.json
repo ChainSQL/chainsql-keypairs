@@ -1,6 +1,6 @@
 {
   "name": "chainsql-keypairs",
-  "version": "0.10.13",
+  "version": "0.10.14",
   "description": "chainsql key pairs",
   "files": [
     "distrib/npm/*",

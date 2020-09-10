@@ -183,10 +183,7 @@ const softGMAlg = {
 			var privateHex =  addressCodec.decodeAccountPrivate(secretStr)
 			keypair  = sm2.generateKeyPairFromSeed(privateHex)
 		}else{
-
 			keypair  = sm2.generateKeyPairHex()
-			var encodedNodePrivate =  addressCodec.encodeNodePrivate(utils.hexToBytes(keypair.privateKey));
-			console.log(encodedNodePrivate)
 		}
 		return keypair
 	},
