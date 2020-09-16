@@ -179,8 +179,9 @@ const softGMAlg = {
 
 		var keypair
 		if( secretBytes.length > 0){
-			var secretStr  =  utils.bytesToString(secretBytes)
-			var privateHex =  addressCodec.decodeAccountPrivate(secretStr)
+			var secretStr  = utils.bytesToString(secretBytes)
+			var privateArr = addressCodec.decodeAccountPrivate(secretStr);
+			var privateHex = utils.parseArrayBufferToHex(privateArr)
 			keypair  = sm2.generateKeyPairFromSeed(privateHex)
 		}else{
 			keypair  = sm2.generateKeyPairHex()
@@ -210,7 +211,8 @@ const softGMAlg = {
 	},
 	sm2Dec: function(priKey, cipherData) {
 
-		var privateHex = addressCodec.decodeAccountPrivate(priKey)
+		var privateArr = addressCodec.decodeAccountPrivate(priKey);
+		var privateHex = utils.parseArrayBufferToHex(privateArr)
 		var keypair    = sm2.generateKeyPairFromSeed(privateHex)
 		return sm2.doDecrypt(cipherData,keypair.privateKey);
 
@@ -250,8 +252,9 @@ const softGMAlg = {
 	},
 	asymDec:function(cipherDataHex, privateKey){
 
-		var privateHex =  addressCodec.decodeAccountPrivate(privateKey)
-		var keypair    =  sm2.generateKeyPairFromSeed(privateHex)
+		var privateArr = addressCodec.decodeAccountPrivate(privateKey);
+		var privateHex = utils.parseArrayBufferToHex(privateArr)
+		var keypair    = sm2.generateKeyPairFromSeed(privateHex)
 		return sm2.doDecrypt(cipherDataHex,keypair.privateKey);
 	},
 	softSM3:function(hexStr){

@@ -1,6 +1,6 @@
 {
   "name": "chainsql-keypairs",
-  "version": "0.10.14",
+  "version": "0.10.15",
   "description": "chainsql key pairs",
   "files": [
     "distrib/npm/*",
@@ -19,7 +19,7 @@
     "chainsql-address-codec": "^2.0.4",
     "elliptic": "^5.1.0",
     "hash.js": "^1.0.3",
-    "chainsql-sm-crypto": "^0.1.0"
+    "chainsql-sm-crypto": "^0.1.2"
   },
   "devDependencies": {
     "assert-diff": "^1.0.1",

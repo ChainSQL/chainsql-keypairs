@@ -45,6 +45,14 @@ function leftPad(input, num) {
   return (new Array(num - input.length + 1)).join('0') + input
 }
 
+/**
+ * 解析arrayBuffer到16进制字符串
+ */
+function parseArrayBufferToHex(input) {
+  return Array.prototype.map.call(new Uint8Array(input), x => ('00' + x.toString(16)).slice(-2)).join('')
+}
+
+
 
 /**
  * 补全16进制字符串
@@ -219,4 +227,5 @@ module.exports = {
   hexToArray: hexToArray,
   arrayToUtf8: arrayToUtf8,
   parseUtf8StringToHex: parseUtf8StringToHex,
+  parseArrayBufferToHex: parseArrayBufferToHex
 };
