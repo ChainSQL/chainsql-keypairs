@@ -3,7 +3,9 @@
 const assert = require('assert')
 const fixtures = require('./fixtures/api.json')
 const api = require('../src')
-const decodeSeed = require('chainsql-address-codec').decodeSeed
+const utils = require('../src/utils')
+const addressCodec = require('chainsql-address-codec')
+const decodeSeed = addressCodec.decodeSeed
 const entropy = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 
 describe('api', () => {
@@ -117,6 +119,45 @@ describe('api', () => {
     const signature = api.sign(messageHex, privateKey)
 
     assert(api.verify(messageHex, signature, publicKey))
+  })
+
+
+  it('symEncrypt&symDecrypt - softGMAlg', () => {
+
+    var symKey    = "1111111111111111";
+
+    const message       = fixtures.softGMAlg.message
+    const ciperHex      = api.softGMAlgSymEnc(symKey,message)
+    const plainTextHex  = api.softGMAlgSymDec(symKey,ciperHex) 
+    const plainText     = Buffer.from(plainTextHex, 'hex').toString()
+
+    assert.strictEqual(plainText, message)
+
+  })
+
+  it('asymEncrypt&asymDecrypt - softGMAlg', () => {
+    var privateKey    = fixtures.softGMAlg.keypair.privateKey
+    var publicKey     = fixtures.softGMAlg.keypair.publicKey
+
+    var opt = { version: 35}
+    var buf = Buffer.from(publicKey, 'hex');
+    publicKey = addressCodec.encode(buf, opt);
+
+    let hexArray = Buffer.from(privateKey,'hex');
+    privateKey = addressCodec.encodeAccountPrivate(hexArray);
+
+    const message       = fixtures.softGMAlg.message
+    const ciperHex      = api.asymEncrypt(message, publicKey)
+    const plainTextHex  = api.asymDecrypt(ciperHex, privateKey) 
+    const plainText     = Buffer.from(plainTextHex, 'hex').toString()
+    assert.strictEqual(plainText, message)
+  })
+
+  it('hash - softGMAlg sm3', () => {
+    const msg    = 'hello world'
+    const hexMsg = Buffer.from(msg).toString('hex')
+    const hash   = '44F0061E69FA6FDFC290C494654A05DC0C053DA7E5C52B84EF93A9D67D3FFF88'
+    assert.strictEqual(api.softGMAlgSm3(hexMsg), hash)
   })
 
   it('deriveAddress', () => {
