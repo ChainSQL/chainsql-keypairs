@@ -189,13 +189,15 @@ const softGMAlg = {
 		return keypair
 	},
 	sign: function(message, privateKey) {
-	
-		let signature =  sm2.doSignature(message, privateKey);
+        let msgHexStr = gmByte2HexStr(message);
+        let msgDgst = sm3.sm3FromHexString(msgHexStr);
+		let signature =  sm2.doSignature(msgDgst, privateKey);
 		return signature;
 	},
 	verify: function(message, signature, publicKey) {
-
-		let bVerify = sm2.doVerifySignature(message, signature,publicKey)
+        let msgHexStr = gmByte2HexStr(message);
+        let msgDgst = sm3.sm3FromHexString(msgHexStr);
+		let bVerify = sm2.doVerifySignature(msgDgst, signature,publicKey)
 		return bVerify;
 	},
 	sm2Enc: function(plainData,publicKey) {
