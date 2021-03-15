@@ -3,7 +3,9 @@
 const assert = require('assert')
 const fixtures = require('./fixtures/api.json')
 const api = require('../src')
-const decodeSeed = require('chainsql-address-codec').decodeSeed
+const utils = require('../src/utils')
+const addressCodec = require('chainsql-address-codec')
+const decodeSeed = addressCodec.decodeSeed
 const entropy = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 
 describe('api', () => {
@@ -13,7 +15,7 @@ describe('api', () => {
 
   it('generateSeed - secp256k1, random', () => {
     const seed = api.generateSeed()
-    assert(seed.charAt(0) === 's')
+    assert(seed.charAt(0) === 'x')
     const {type, bytes} = decodeSeed(seed)
     assert(type === 'secp256k1')
     assert(bytes.length === 16)
@@ -26,11 +28,25 @@ describe('api', () => {
 
   it('generateSeed - ed25519, random', () => {
     const seed = api.generateSeed({algorithm: 'ed25519'})
-    assert(seed.slice(0, 3) === 'sEd')
+    assert(seed.slice(0, 3) === 'xEd')
     const {type, bytes} = decodeSeed(seed)
     assert(type === 'ed25519')
     assert(bytes.length === 16)
   })
+
+  it('generateSeed - softGMAlg', () => {
+   
+    const seed = api.generateSeed({secret:"p97evg5Rht7ZB7DbEpVqmV3yiSBMxR3pRBKJyLcRWt7SL5gEeBb", algorithm: 'softGMAlg'})
+    assert(seed.secret === 'p97evg5Rht7ZB7DbEpVqmV3yiSBMxR3pRBKJyLcRWt7SL5gEeBb')
+    assert(seed.type === 'softGMAlg')     
+  })
+
+  it('generateSeed - softGMAlg, random', () => {
+    const seed = api.generateSeed({algorithm: 'softGMAlg'})
+    assert(seed.secret === '')
+    assert(seed.type === 'softGMAlg')
+  })
+
 
   it('deriveKeypair - secp256k1', () => {
     const keypair = api.deriveKeypair(fixtures.secp256k1.seed)
@@ -40,6 +56,11 @@ describe('api', () => {
   it('deriveKeypair - ed25519', () => {
     const keypair = api.deriveKeypair(fixtures.ed25519.seed)
     assert.deepEqual(keypair, fixtures.ed25519.keypair)
+  })
+
+  it('deriveKeypair - softGMAlg', () => {
+    const keypair = api.deriveKeypair(fixtures.softGMAlg.seed)
+    assert.deepEqual(keypair, fixtures.softGMAlg.keypair)
   })
 
   it('deriveAddress - secp256k1 public key', () => {
@@ -52,10 +73,16 @@ describe('api', () => {
     assert.strictEqual(address, fixtures.ed25519.address)
   })
 
+  it('deriveAddress - softGMAlg public key', () => {
+    const address = api.deriveAddress(fixtures.softGMAlg.keypair.publicKey)
+    assert.strictEqual(address, fixtures.softGMAlg.address)
+  })
+
+
   it('sign - secp256k1', () => {
     const privateKey = fixtures.secp256k1.keypair.privateKey
     const message = fixtures.secp256k1.message
-    const messageHex = (new Buffer(message, 'utf8')).toString('hex')
+    const messageHex =  Buffer.from(message, 'utf8').toString('hex')
     const signature = api.sign(messageHex, privateKey)
     assert.strictEqual(signature, fixtures.secp256k1.signature)
   })
@@ -64,14 +91,14 @@ describe('api', () => {
     const signature = fixtures.secp256k1.signature
     const publicKey = fixtures.secp256k1.keypair.publicKey
     const message = fixtures.secp256k1.message
-    const messageHex = (new Buffer(message, 'utf8')).toString('hex')
+    const messageHex =  Buffer.from(message, 'utf8').toString('hex')
     assert(api.verify(messageHex, signature, publicKey))
   })
 
   it('sign - ed25519', () => {
     const privateKey = fixtures.ed25519.keypair.privateKey
     const message = fixtures.ed25519.message
-    const messageHex = (new Buffer(message, 'utf8')).toString('hex')
+    const messageHex = Buffer.from(message, 'utf8').toString('hex')
     const signature = api.sign(messageHex, privateKey)
     assert.strictEqual(signature, fixtures.ed25519.signature)
   })
@@ -80,20 +107,69 @@ describe('api', () => {
     const signature = fixtures.ed25519.signature
     const publicKey = fixtures.ed25519.keypair.publicKey
     const message = fixtures.ed25519.message
-    const messageHex = (new Buffer(message, 'utf8')).toString('hex')
+    const messageHex =  Buffer.from(message, 'utf8').toString('hex')
     assert(api.verify(messageHex, signature, publicKey))
   })
 
-  it('deriveNodeAddress', () => {
-    const x = 'n9KHn8NfbBsZV5q8bLfS72XyGqwFt5mgoPbcTV4c6qKiuPTAtXYk'
-    const y = 'rU7bM9ENDkybaxNrefAVjdLTyNLuue1KaJ'
-    assert.strictEqual(api.deriveNodeAddress(x), y)
+  it('sign&verify - softGMAlg', () => {
+    const privateKey = fixtures.softGMAlg.keypair.privateKey
+    const publicKey = fixtures.softGMAlg.keypair.publicKey
+    const message = fixtures.softGMAlg.message
+    const messageHex =  Buffer.from(message, 'utf8').toString('hex')
+    const signature = api.sign(messageHex, privateKey)
+
+    assert(api.verify(messageHex, signature, publicKey))
+  })
+
+
+  it('symEncrypt&symDecrypt - softGMAlg', () => {
+
+    var symKey    = "1111111111111111";
+
+    const message       = fixtures.softGMAlg.message
+    const ciperHex      = api.softGMAlgSymEnc(symKey,message)
+    const plainTextHex  = api.softGMAlgSymDec(symKey,ciperHex) 
+    const plainText     = Buffer.from(plainTextHex, 'hex').toString()
+
+    assert.strictEqual(plainText, message)
+
+  })
+
+  it('asymEncrypt&asymDecrypt - softGMAlg', () => {
+    var privateKey    = fixtures.softGMAlg.keypair.privateKey
+    var publicKey     = fixtures.softGMAlg.keypair.publicKey
+
+    var opt = { version: 35}
+    var buf = Buffer.from(publicKey, 'hex');
+    publicKey = addressCodec.encode(buf, opt);
+
+    let hexArray = Buffer.from(privateKey,'hex');
+    privateKey = addressCodec.encodeAccountPrivate(hexArray);
+
+    const message       = fixtures.softGMAlg.message
+    const ciperHex      = api.asymEncrypt(message, publicKey)
+    const plainTextHex  = api.asymDecrypt(ciperHex, privateKey) 
+    const plainText     = Buffer.from(plainTextHex, 'hex').toString()
+    assert.strictEqual(plainText, message)
+  })
+
+  it('hash - softGMAlg sm3', () => {
+    const msg    = 'hello world'
+    const hexMsg = Buffer.from(msg).toString('hex')
+    const hash   = '44F0061E69FA6FDFC290C494654A05DC0C053DA7E5C52B84EF93A9D67D3FFF88'
+    assert.strictEqual(api.softGMAlgSm3(hexMsg), hash)
+  })
+
+  it('deriveAddress', () => {
+    const publicKey = 'cBQG8RQArjx1eTKFEAQXz2gS4utaDiEC9wmi7pfUPTi27VCchwgw'
+    const address   = 'zBTqtHzjzm75pc7eH79QFTKgp4dgi4hadT'
+    assert.strictEqual(api.deriveAddress(publicKey), address)
   })
 
   it('Random Address', () => {
     const seed = api.generateSeed()
     const keypair = api.deriveKeypair(seed)
     const address = api.deriveAddress(keypair.publicKey)
-    assert(address[0] === 'r')
+    assert(address[0] === 'z')
   })
 })
