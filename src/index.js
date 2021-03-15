@@ -208,55 +208,52 @@ const softGMAlg = {
 			publicKey = utils.bytesToHex(decodedPublic);
 		}
 
-		var cipper = sm2.doEncryptFromHex(plainData.toUpperCase(),publicKey)
+		const cipper = sm2.doEncryptFromHex(plainData.toUpperCase(), publicKey, 1);
 		return cipper;	
 	},
 	sm2Dec: function(priKey, cipherData) {
 
-		var privateArr = addressCodec.decodeAccountPrivate(priKey);
-		var privateHex = utils.parseArrayBufferToHex(privateArr)
-		var keypair    = sm2.generateKeyPairFromSeed(privateHex)
-		return sm2.doDecrypt(cipherData,keypair.privateKey);
+		let privateArr = addressCodec.decodeAccountPrivate(priKey);
+		let privateHex = utils.parseArrayBufferToHex(privateArr);
+		let keypair    = sm2.generateKeyPairFromSeed(privateHex);
+		return sm2.doDecrypt(cipherData, keypair.privateKey, 1);
 
 	},
 	symEnc:function(symKey, plaintext){
 
-		var plainHex    = utils.parseUtf8StringToHex(plaintext);
-		var plainArr    = utils.hexToArray(plainHex);
-		var symKeyBytes = utils.hexToBytes(symKey)
+		let plainHex    = utils.parseUtf8StringToHex(plaintext);
+		let plainArr    = utils.hexToArray(plainHex);
+		let symKeyBytes = utils.hexToBytes(symKey);
 
-		var cipper =  sm4.sm4SymEnc(plainArr,symKeyBytes);
+		let cipper =  sm4.sm4SymEnc(plainArr,symKeyBytes);
 
-		var ciperHex = utils.bytesToHex(cipper);
-		return ciperHex;
+		return utils.bytesToHex(cipper);
 	},
 	symDec:function(symKey, hexCipherData){
 
 		// sm4解密 
-		var symKeyBytes  = utils.hexToBytes(symKey)
-		var cipherArr    = utils.hexToArray(hexCipherData);	
-		var plainBytes   = sm4.sm4SymDec(cipherArr, symKeyBytes)
+		let symKeyBytes  = utils.hexToBytes(symKey);
+		let cipherArr    = utils.hexToArray(hexCipherData);	
+		let plainBytes   = sm4.sm4SymDec(cipherArr, symKeyBytes)
 		return utils.bytesToHex(plainBytes)
 
 	},
 	asymEnc:function(message, publicKey){
 
-		var plainData = Buffer.from(message, 'utf8').toString('hex');
+		let plainData = Buffer.from(message, 'utf8').toString('hex');
 		if(publicKey.length !== 130){
 			let decoded = addressCodec.decode(publicKey, ACCOUNT_PUBLIC);
 			let decodedPublic = decoded.slice(1, decoded.length-4);
 			publicKey = utils.bytesToHex(decodedPublic);
 		}
 
-		var cipper = sm2.doEncryptFromHex(plainData.toUpperCase(),publicKey)
-		return cipper;	
-
+		return sm2.doEncryptFromHex(plainData.toUpperCase(),publicKey);	
 	},
 	asymDec:function(cipherDataHex, privateKey){
 
-		var privateArr = addressCodec.decodeAccountPrivate(privateKey);
-		var privateHex = utils.parseArrayBufferToHex(privateArr)
-		var keypair    = sm2.generateKeyPairFromSeed(privateHex)
+		let privateArr = addressCodec.decodeAccountPrivate(privateKey);
+		let privateHex = utils.parseArrayBufferToHex(privateArr);
+		let keypair    = sm2.generateKeyPairFromSeed(privateHex);
 		return sm2.doDecrypt(cipherDataHex,keypair.privateKey);
 	},
 	softSM3:function(hexStr){
