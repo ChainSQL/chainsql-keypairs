@@ -28,7 +28,13 @@ var cryptAlgType = "normal"; // "gmAlg"  "normal"  "softGMAlg"
 function generateSeed(options = {}) {
 
 	assert(!options.entropy || options.entropy.length >= 16, 'entropy too short')
-	const entropy = options.entropy ? options.entropy.slice(0, 16) : brorand(16)
+	//For Wechat applet
+	if(global.wx){
+		var entropy = options.entropy ? options.entropy.slice(0, 16) : getRandomValues(16);
+	}else{
+		var entropy = options.entropy ? options.entropy.slice(0, 16) : brorand(16);
+	}
+	
 //   const type = options.algorithm === 'ed25519' ? 'ed25519' : 'secp256k1'
 	let type;
 	switch (options.algorithm) {
@@ -599,6 +605,16 @@ function asymDecrypt(messageHex, privateKey) {
 	return select(algorithm).asymDec(messageHex, privateKey)
 }
 
+// for Wechat applet
+function getRandomValues( length ) {      
+	var array = [];
+	for (var i = 0, l = length; i < l; i++) {  
+  
+	  array[i] = Math.floor(Math.random() * 256);  
+	}  
+  
+	return array;  
+}
 
 module.exports = {
   generateSeed,
