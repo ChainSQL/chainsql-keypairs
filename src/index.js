@@ -428,15 +428,15 @@ function sign(messageHex, privateKey) {
 }
 
 function signBytes(message, privateKey) {
-
-	var algorithm = "ecdsa-secp256k1";
-	if(cryptAlgType === "gmAlg"){
-		algorithm = "gmAlg";
-	}else if(cryptAlgType === "softGMAlg"){
-		algorithm = "softGMAlg";
-	}else if(cryptAlgType === "ed25519"){
-		algorithm = "ed25519";
-	}
+	const algorithm = getAlgorithmFromKey(privateKey)
+	// var algorithm = "ecdsa-secp256k1";
+	// if(cryptAlgType === "gmAlg"){
+	// 	algorithm = "gmAlg";
+	// }else if(cryptAlgType === "softGMAlg"){
+	// 	algorithm = "softGMAlg";
+	// }else if(cryptAlgType === "ed25519"){
+	// 	algorithm = "ed25519";
+	// }
   	return select(algorithm).sign(message, privateKey)
 }
 
